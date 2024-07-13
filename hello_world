@@ -1,14 +1,20 @@
 #!/usr/bin/python3
 from bcc import BPF
 
-    program = r"""
+program = r"""
 int hello(void *ctx) {
   bpf_trace_printk("Hello, World!");
   return 0;
 }
 """
 
+# load the program
 b = BPF(text=program)
+
+# ge the syscall event to pass it along
+# 
+# > The name of the function that implements it in the kernel depends on the chip
+# architecture. 
 syscall = b.get_syscall_fnname("execve")
 b.attacg_kprobe(event=syscall, fn_name ="hello")
 
