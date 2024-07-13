@@ -33,6 +33,10 @@ b = BPF(text=program)
 syscall = b.get_syscall_fnname("execve") # execve os 'execute a file'. check using 'man execve'
 b.attach_kprobe(event=syscall, fn_name="hello")
 
+
+# To test this program, you can create another user and su that-user
+# reason for this, as it's a map, and using user's id, unless you change the user, you'll see only
+# one set of output.
 while True:
     print("sleeping for 2 seconds")
     sleep(2)
