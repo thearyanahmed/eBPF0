@@ -1,0 +1,44 @@
+#!/usr/bin/python3
+from bcc import BPF 
+from time import sleep
+
+program = r"""
+BPF_HASH(counter_hash); // define a hash called counter 
+
+int hello (void *ctx) {
+    u64 uid;
+    u64 counter = 0;
+    u64 *p;
+
+    
+   // Example: Assume bpf_get_current_uid_gid() returns 0x123456789ABCDEF0
+   // Mask the value to get the lower 32 bits (UID part)
+   // 0x123456789ABCDEF0 & 0xFFFFFFFF = 0x9ABCDEF0
+    uid = bpf_get_current_uid_gid() && 0xFFFFFFFF;
+    p = counter.lookup(&uid);
+
+    if (p != 0) {
+        counter = *p;
+    }
+
+    counter++;
+    counter_hash.update(&uid, &counter);
+    
+    return 0;
+}
+
+"""
+
+b = BPF(text=program)
+syscall = b.get_syscall_fnname("execve") # execve os 'execute a file'. check using 'man execve'
+b.attach_kprobe(event=syscall, fn_name="hello")
+
+while True:
+    print("sleeping for 2 seconds")
+    sleep(2)
+    s = ""
+
+    for k,v in b["counter_hash"].items():
+        s += f"ID {k.value} : {v.value}\t"
+    print(s)
+    
