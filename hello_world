@@ -16,7 +16,7 @@ b = BPF(text=program)
 # > The name of the function that implements it in the kernel depends on the chip
 # architecture. 
 syscall = b.get_syscall_fnname("execve")
-b.attacg_kprobe(event=syscall, fn_name ="hello")
+b.attach_kprobe(event=syscall, fn_name ="hello")
 
 b.trace_print()
       
